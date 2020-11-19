@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using RpgTenebra.Models.VampireM5;
+using RpgTenebra.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RpgTenebra.Models;
-using RpgTenebra.Models.VampireM5;
 
 namespace RpgTenebra.Controllers
 {
@@ -14,97 +12,45 @@ namespace RpgTenebra.Controllers
     [ApiController]
     public class GlosseryOfTheDamnedsController : ControllerBase
     {
-        private readonly TenebraContext _context;
+        private readonly IGlosseryOfTheDamnedRepository _glosseryOfTheDamnedRepository;
 
-        public GlosseryOfTheDamnedsController(TenebraContext context)
+        public GlosseryOfTheDamnedsController(IGlosseryOfTheDamnedRepository productRepository)
         {
-            _context = context;
+            _glosseryOfTheDamnedRepository = productRepository;
         }
 
-        // GET: api/GlosseryOfTheDamneds
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GlosseryOfTheDamned>>> GetGlosseryOfTheDamned()
+        public async Task<ActionResult<GlosseryOfTheDamned>> GellAll()
         {
-            return await _context.GlosseryOfTheDamned.ToListAsync();
+            var products = await _glosseryOfTheDamnedRepository.GetAllGlosseryOfTheDamneds();
+            return Ok(products);
         }
 
-        // GET: api/GlosseryOfTheDamneds/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<GlosseryOfTheDamned>> GetGlosseryOfTheDamned(int id)
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<GlosseryOfTheDamned>> GetById(int id)
         {
-            var glosseryOfTheDamned = await _context.GlosseryOfTheDamned.FindAsync(id);
-
-            if (glosseryOfTheDamned == null)
-            {
-                return NotFound();
-            }
-
-            return glosseryOfTheDamned;
+            var product = await _glosseryOfTheDamnedRepository.GetById(id);
+            return Ok(product);
         }
-
-        // PUT: api/GlosseryOfTheDamneds/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGlosseryOfTheDamned(int id, GlosseryOfTheDamned glosseryOfTheDamned)
-        {
-            if (id != glosseryOfTheDamned.GodId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(glosseryOfTheDamned).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GlosseryOfTheDamnedExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/GlosseryOfTheDamneds
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<GlosseryOfTheDamned>> PostGlosseryOfTheDamned(GlosseryOfTheDamned glosseryOfTheDamned)
+        public async Task<ActionResult> AddProduct(GlosseryOfTheDamned entity)
         {
-            _context.GlosseryOfTheDamned.Add(glosseryOfTheDamned);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetGlosseryOfTheDamned", new { id = glosseryOfTheDamned.GodId }, glosseryOfTheDamned);
+            await _glosseryOfTheDamnedRepository.AddGlosseryOfTheDamned(entity);
+            return Ok(entity);
         }
-
-        // DELETE: api/GlosseryOfTheDamneds/5
+        [HttpPut("{id}")]
+        public async Task<ActionResult<GlosseryOfTheDamned>> Update(GlosseryOfTheDamned entity, int id)
+        {
+            await _glosseryOfTheDamnedRepository.UpdateGlosseryOfTheDamned(entity, id);
+            return Ok(entity);
+        }
         [HttpDelete("{id}")]
-        public async Task<ActionResult<GlosseryOfTheDamned>> DeleteGlosseryOfTheDamned(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var glosseryOfTheDamned = await _context.GlosseryOfTheDamned.FindAsync(id);
-            if (glosseryOfTheDamned == null)
-            {
-                return NotFound();
-            }
-
-            _context.GlosseryOfTheDamned.Remove(glosseryOfTheDamned);
-            await _context.SaveChangesAsync();
-
-            return glosseryOfTheDamned;
-        }
-
-        private bool GlosseryOfTheDamnedExists(int id)
-        {
-            return _context.GlosseryOfTheDamned.Any(e => e.GodId == id);
+            await _glosseryOfTheDamnedRepository.RemoveGlosseryOfTheDamned(id);
+            return Ok();
         }
     }
+
 }

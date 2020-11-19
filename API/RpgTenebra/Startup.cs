@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RpgTenebra.Models;
-using RpgTenebra.Models.VampireM5;
+using RpgTenebra.Services;
+using RpgTenebra.Services.Queries;
 
 namespace RpgTenebra
 {
@@ -29,7 +22,9 @@ namespace RpgTenebra
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            
+            services.AddTransient<IGlosseryOfTheDamnedCommandText, GlosseryOfTheDamnedCommandText>();
+            services.AddTransient<IGlosseryOfTheDamnedRepository, GlosseryOfTheDamnedRepository>();
+
             //Remove camelback formating for api call result
 
             services.AddMvc(setupAction =>
@@ -42,14 +37,10 @@ namespace RpgTenebra
             .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // Add objectr to my data base
-            services.AddDbContext<TenebraContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+            //services.AddDbContext<TenebraContext>(options =>
+            //options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
 
-            //Vampire Masquarade 5
-            /*
-                Add-Migration "InitialCreate"
-                Update-Database
-             */
+          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,7 +50,8 @@ namespace RpgTenebra
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
             app.UseHttpsRedirection();
 
             app.UseRouting();
